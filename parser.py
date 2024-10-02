@@ -1,5 +1,5 @@
 import yaml
-from endpoint import Endpoint, Domains
+from domains import Endpoint, Domains
 
 def parseYaml(filepath):
     with open(filepath, "r") as file:
