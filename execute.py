@@ -23,5 +23,16 @@ def runRequest(endpoint):
     elif method=="PUT":
         response = requests.put(url, headers = header, json=body, timeout=0.5)
         latency = response.elapsed.total_seconds() * 1000
-    #print(response.status_code)
+    elif method=="HEAD":
+        response = requests.head(url, headers = header, json=body, timeout=0.5)
+        latency = response.elapsed.total_seconds() * 1000
+    elif method=="OPTIONS":
+        response = requests.options(url, headers = header, json=body, timeout=0.5)
+        latency = response.elapsed.total_seconds() * 1000
+    elif method=="CONNECT":
+        response = requests.connect(url, headers = header, json=body, timeout=0.5)
+        latency = response.elapsed.total_seconds() * 1000
+    elif method=="TRACE":
+        response = requests.trace(url, headers = header, json=body, timeout=0.5)
+        latency = response.elapsed.total_seconds() * 1000
     return response.status_code, latency
