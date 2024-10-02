@@ -1,7 +1,8 @@
 from urllib.parse import urlparse
 import threading
 import requests
-        
+import json
+from requests.exceptions import ReadTimeout, ConnectionError
 
 class Domains:
     def __init__(self):
@@ -9,6 +10,7 @@ class Domains:
         self.health = {}
         self.num_checks = {}
         self.lock = threading.Lock()
+        self.TIMEOUT_FLAG = False
     
     def addEndpoint(self, endpoint):
         parsed_url = urlparse(endpoint.url)
@@ -31,45 +33,72 @@ class Domains:
         threads = []
         for domain in self.endpoints:
             for endpoint in self.endpoints[domain]:
-                thread = threading.Thread(target=self.check, args=(domain, endpoint,))
+                thread = threading.Thread(target=self.runRequest, args=(domain, endpoint,))
                 threads.append(thread)
                 thread.start()
         
         for thread in threads:
             thread.join()
 
-    def check(self, domain, endpoint):
+    def runRequest(self, domain, endpoint):
         with self.lock:
             url = endpoint.url
             header = endpoint.header
             method = endpoint.method
             body = endpoint.body
+            if endpoint.body:
+                body = json.loads(endpoint.body)
+            else:
+                body = {}
             if not method:
-                response = requests.get(url, headers=header, timeout=0.5)
-                latency = response.elapsed.total_seconds() * 1000
+                try:
+                    response = requests.get(url, headers=header, timeout=0.5)
+                    latency = response.elapsed.total_seconds() * 1000
+                except (ReadTimeout, ConnectionError, Exception) as e:
+                    self.TIMEOUT_FLAG = True
             elif method=="GET":
-                response = requests.get(url, headers=header, timeout=0.5)
-                latency = response.elapsed.total_seconds() * 1000
+                try:
+                    response = requests.get(url, headers=header, timeout=0.5)
+                    latency = response.elapsed.total_seconds() * 1000
+                except (ReadTimeout, ConnectionError, Exception) as e:
+                    self.TIMEOUT_FLAG = True
             elif method=="POST":
-                print(type(body))
-                response = requests.post(url, headers=header, json=body, timeout=0.5)
-                latency = response.elapsed.total_seconds() * 1000
+                try:
+                    response = requests.post(url, headers=header, json=body, timeout=0.5)
+                    latency = response.elapsed.total_seconds() * 1000
+                except (ReadTimeout, ConnectionError, Exception) as e:
+                    self.TIMEOUT_FLAG = True
             elif method=="PATCH":
-                response = requests.patch(url, headers=header, json=body, timeout=0.5)
-                latency = response.elapsed.total_seconds() * 1000
+                try:
+                    response = requests.patch(url, headers=header, json=body, timeout=0.5)
+                    latency = response.elapsed.total_seconds() * 1000
+                except (ReadTimeout, ConnectionError, Exception) as e:
+                    self.TIMEOUT_FLAG = True
             elif method=="DELETE":
-                response = requests.delete(url, headers=header, json=body, timeout=0.5)
-                latency = response.elapsed.total_seconds() * 1000
+                try:
+                    response = requests.delete(url, headers=header, json=body, timeout=0.5)
+                    latency = response.elapsed.total_seconds() * 1000
+                except (ReadTimeout, ConnectionError, Exception) as e:
+                    self.TIMEOUT_FLAG = True
             elif method=="PUT":
-                response = requests.put(url, headers = header, json=body, timeout=0.5)
-                latency = response.elapsed.total_seconds() * 1000
+                try:
+                    response = requests.put(url, headers = header, json=body, timeout=0.5)
+                    latency = response.elapsed.total_seconds() * 1000
+                except (ReadTimeout, ConnectionError, Exception) as e:
+                    self.TIMEOUT_FLAG = True
             elif method=="HEAD":
-                response = requests.head(url, headers = header, json=body, timeout=0.5)
-                latency = response.elapsed.total_seconds() * 1000
+                try:
+                    response = requests.head(url, headers = header, json=body, timeout=0.5)
+                    latency = response.elapsed.total_seconds() * 1000
+                except (ReadTimeout, ConnectionError, Exception) as e:
+                    self.TIMEOUT_FLAG = True
             elif method=="OPTIONS":
-                response = requests.options(url, headers = header, json=body, timeout=0.5)
-                latency = response.elapsed.total_seconds() * 1000
-            if response.status_code>=200 and response.status_code<=299 and latency<500:
+                try:
+                    response = requests.options(url, headers = header, json=body, timeout=0.5)
+                    latency = response.elapsed.total_seconds() * 1000
+                except (ReadTimeout, ConnectionError, Exception) as e:
+                    self.TIMEOUT_FLAG = True
+            if not self.TIMEOUT_FLAG and response.status_code>=200 and response.status_code<=299 and latency<500:
                 self.health[domain]+=1
             self.num_checks[domain]+=1
 

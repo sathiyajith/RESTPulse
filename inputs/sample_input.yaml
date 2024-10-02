@@ -34,3 +34,5 @@
   url: https://fakerestapi.azurewebsites.net/api/v1/authors
 - name: fakerest
   url: https://fakerestapi.azurewebsites.net/api/v1/books
+- name: google
+  url: https://www.google.com
