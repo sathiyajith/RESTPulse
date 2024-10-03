@@ -1,23 +1,24 @@
 import pytest
 from parser import parseYaml
+from domains import Domains, Endpoint
 import threading
 
 @pytest.fixture
-#This function just parses and returns list of domains without any check
+# Parses and returns the list of domains without any checks
 def domains():
     filepath = "./inputs/sample_input_2.yaml"
     domains = parseYaml(filepath)
     assert len(domains.endpoints.keys())>0
     return domains
 
-#This function tests initialization of dictionaries
+# Tests initialization of dictionaries
 def test_initialization(domains):
     assert len(domains.health.keys())>0
     assert len(domains.num_checks.keys())>0
     assert len(domains.num_checks.keys())==len(domains.health.keys())
 
 
-# This function tests synchronization by creating 500 threads and concurrently accessing the shared variables
+# Tests synchronization by creating 500 threads and concurrently accessing the shared variables
 # Once all the threads call the target function, the dictionary values are checked for consistency.
 def test_synchronization(domains):
     threads = []
@@ -32,4 +33,21 @@ def test_synchronization(domains):
     for domain in domains.endpoints:
         assert domains.health[domain]==1000
         assert domains.num_checks[domain]==1000
-    
+
+# For each 100 range of error codes, it test an endpoint to make sure all the ranges are covered.
+def test_error_codes():
+    filepath = "./inputs/sample_input_4.yaml"
+    sample_domain = "httpbin.org"
+    domains = parseYaml(filepath)
+    domains.checkHealth()
+    assert domains.health[sample_domain]==1
+    assert domains.num_checks[sample_domain]==8
+
+# Tests whether the tool can handle timeouts and infinite waits.
+def test_timeouts():
+    filepath = "./inputs/sample_input_3.yaml"
+    sample_domain = "httpbin.org"
+    domains = parseYaml(filepath)
+    domains.checkHealth()
+    assert domains.health[sample_domain]==0
+    assert domains.num_checks[sample_domain]==3

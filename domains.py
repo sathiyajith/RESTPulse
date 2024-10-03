@@ -9,7 +9,7 @@ class Domains:
     # The Domains class contains:
     # A dictionary to store the list of endpoints,
     # A dictionary to store Number of requests sent for each domain 
-    # A dictionary to store current availability of an domain.
+    # A dictionary to store current availability of each domain.
     # The TIMEOUT_FLAG is used for acknowledging any timeout or connection errors or exceptions.
     def __init__(self):
         self.endpoints = {}
@@ -17,7 +17,7 @@ class Domains:
         self.num_checks = {}
         self.lock = threading.Lock()
     
-    # Parsing the endpoint to get domain and initializing the dictionaries with domain entries
+    # Parses the endpoint to get the domain and initializes the dictionaries with domain entries
     def addEndpoint(self, endpoint):
         parsed_url = urlparse(endpoint.url)
         domain = parsed_url.netloc
@@ -47,7 +47,7 @@ class Domains:
         for thread in threads:
             thread.join()
 
-    # runRequest sends an request to the corresponding endpoint and collects response
+    # runRequest sends an request to the corresponding endpoint and collects response.
     # The request waits only for 500ms beyond which ReadTimeout exception is triggered.
     # This exception ensures that the client doesn't wait indefinitely for the response. 
     # Based on the latency and status code, the availability is incremented.  
@@ -82,8 +82,8 @@ class Domains:
                 latency = response.elapsed.total_seconds() * 1000
         except (ReadTimeout, ConnectionError, Exception) as e:
             TIMEOUT_FLAG = True
-        # The below portion is the critical section and hence lock is acquired
-        # In this critical section, multiple threads try to access num_checks and health dictionary
+        # The below portion is the critical section and hence the lock is acquired
+        # In this critical section, multiple threads try to access num_checks and health dictionaries
         # But only one thread enters the critical section - Mutual exclusion
         self.lock.acquire()
         self.num_checks[domain]+=1
@@ -96,7 +96,7 @@ class Domains:
 class Endpoint:
 
     # The endpoint consists of the elements present in the schema required for sending a HTTP request
-    def __init__(self, name, url, method, header, body):
+    def __init__(self, name, url, method=None, header=None, body=None):
         self.name = name
         self.url = url
         self.method = method

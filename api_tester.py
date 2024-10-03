@@ -5,7 +5,7 @@ import time
     
 
 if __name__ == "__main__":
-    # The arg_parser parses the command line arguments and checks if the provided filepath is valid and is an yaml file.
+    # The arg_parser parses the command line arguments and checks if the provided filepath is a valid yaml file.
     arg_parser = argparse.ArgumentParser(description="Tests API health")
     arg_parser.add_argument("--filepath", help="Absolute file path", default="")
     args = arg_parser.parse_args()

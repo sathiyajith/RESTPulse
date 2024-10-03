@@ -1,0 +1,16 @@
+- name: 404
+  url: https://httpbin.org/status/404
+- name: 500
+  url: https://httpbin.org/status/500
+- name: 429
+  url: https://httpbin.org/status/429
+- name: 100
+  url: https://httpbin.org/status/100
+- name: 200
+  url: https://httpbin.org/
+- name: 300
+  url: https://httpbin.org/status/300
+- name: 500
+  url: https://httpbin.org/status/500
+- name: 599
+  url: https://httpbin.org/status/599

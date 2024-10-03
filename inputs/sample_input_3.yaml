@@ -1,0 +1,6 @@
+- name: timeout_1
+  url: https://httpbin.org/delay/1
+- name: timeout_5
+  url: https://httpbin.org/delay/5
+- name: timeout_10
+  url: https://httpbin.org/delay/10
