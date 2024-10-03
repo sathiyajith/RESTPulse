@@ -1,8 +1,10 @@
-- name: google
-  url: https://www.google.com
-- name: youtube
-  url: https://www.youtube.com
-- name: jsonplaceholder
-  url: https://jsonplaceholder.typicode.com
-- name: jsonplaceholder posts
-  url: https://jsonplaceholder.typicode.com/posts
+- headers:
+    user-agent: fetch-synthetic-monitor
+  method: GET
+  name: fetch index page
+  url: https://fetch.com/
+- headers:
+    user-agent: fetch-synthetic-monitor
+  method: GET
+  name: fetch careers page
+  url: https://fetch.com/careers

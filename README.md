@@ -5,12 +5,12 @@ This is an automated HTTP REST API Health checker tool designed as part of Fetch
 
 ## Features
 - This tool supports multithreading, so that the endpoints are checked every 15 seconds parallelly, even if the yaml file is very big.
+- This tool is unit tested using PyTest module with upto 500 threads running parallelly.
 - This tool has timeout enabled with 500 milliseconds as threshold to handle unbounded waiting cases.
 
 ## How this tool can be improved
 - Number of http requests can be reduced, the healthier api's next check can be delayed.
 - CONNECT and TRACE HTTP methods are not supported.
-
 
 ## Setup
 Install Python and Pip

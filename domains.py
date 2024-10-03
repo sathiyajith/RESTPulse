@@ -16,7 +16,6 @@ class Domains:
         self.health = {}
         self.num_checks = {}
         self.lock = threading.Lock()
-        self.TIMEOUT_FLAG = False
     
     # Parsing the endpoint to get domain and initializing the dictionaries with domain entries
     def addEndpoint(self, endpoint):
@@ -32,10 +31,9 @@ class Domains:
         
     # Calculates current availability percentage and prints this status for each domain
     def printStatus(self):
-        with self.lock:
-            for domain in self.endpoints:
-                health_percent = int((self.health[domain]/self.num_checks[domain])*100)
-                print(domain + " has " + str(health_percent) + "% availability percentage")
+        for domain in self.endpoints:
+            health_percent = int((self.health[domain]/self.num_checks[domain])*100)
+            print(domain + " has " + str(health_percent) + "% availability percentage")
     
     # Starts a thread for each endpoint and calls runRequest(). Then thread.join() is called for synchronization. 
     def checkHealth(self):
@@ -54,60 +52,45 @@ class Domains:
     # This exception ensures that the client doesn't wait indefinitely for the response. 
     # Based on the latency and status code, the availability is incremented.  
     def runRequest(self, domain, endpoint):
-        with self.lock:
-            url = endpoint.url
-            header = endpoint.header
-            method = endpoint.method
-            body = endpoint.body
-            if endpoint.body:
-                body = json.loads(endpoint.body)
-            else:
-                body = {}
+        url = endpoint.url
+        header = endpoint.header
+        method = endpoint.method
+        body = endpoint.body
+        TIMEOUT_FLAG = False
+        if endpoint.body:
+            body = json.loads(endpoint.body)
+        else:
+            body = {}
+        response = None
+        latency = None
+        try:
             if not method or method=="GET":
-                try:
-                    response = requests.get(url, headers=header, timeout=0.5)
-                    latency = response.elapsed.total_seconds() * 1000
-                except (ReadTimeout, ConnectionError, Exception) as e:
-                    self.TIMEOUT_FLAG = True
+                response = requests.get(url, headers=header, timeout=0.5)
             elif method=="POST":
-                try:
-                    response = requests.post(url, headers=header, json=body, timeout=0.5)
-                    latency = response.elapsed.total_seconds() * 1000
-                except (ReadTimeout, ConnectionError, Exception) as e:
-                    self.TIMEOUT_FLAG = True
+                response = requests.post(url, headers=header, json=body, timeout=0.5)
             elif method=="PATCH":
-                try:
-                    response = requests.patch(url, headers=header, json=body, timeout=0.5)
-                    latency = response.elapsed.total_seconds() * 1000
-                except (ReadTimeout, ConnectionError, Exception) as e:
-                    self.TIMEOUT_FLAG = True
+                response = requests.patch(url, headers=header, json=body, timeout=0.5)
             elif method=="DELETE":
-                try:
-                    response = requests.delete(url, headers=header, json=body, timeout=0.5)
-                    latency = response.elapsed.total_seconds() * 1000
-                except (ReadTimeout, ConnectionError, Exception) as e:
-                    self.TIMEOUT_FLAG = True
+                response = requests.delete(url, headers=header, json=body, timeout=0.5)
             elif method=="PUT":
-                try:
-                    response = requests.put(url, headers = header, json=body, timeout=0.5)
-                    latency = response.elapsed.total_seconds() * 1000
-                except (ReadTimeout, ConnectionError, Exception) as e:
-                    self.TIMEOUT_FLAG = True
+                response = requests.put(url, headers = header, json=body, timeout=0.5)
             elif method=="HEAD":
-                try:
-                    response = requests.head(url, headers = header, json=body, timeout=0.5)
-                    latency = response.elapsed.total_seconds() * 1000
-                except (ReadTimeout, ConnectionError, Exception) as e:
-                    self.TIMEOUT_FLAG = True
+                response = requests.head(url, headers = header, json=body, timeout=0.5)
             elif method=="OPTIONS":
-                try:
-                    response = requests.options(url, headers = header, json=body, timeout=0.5)
-                    latency = response.elapsed.total_seconds() * 1000
-                except (ReadTimeout, ConnectionError, Exception) as e:
-                    self.TIMEOUT_FLAG = True
-            if not self.TIMEOUT_FLAG and response.status_code>=200 and response.status_code<=299 and latency<500:
-                self.health[domain]+=1
-            self.num_checks[domain]+=1
+                response = requests.options(url, headers = header, json=body, timeout=0.5)
+            if response:
+                latency = response.elapsed.total_seconds() * 1000
+        except (ReadTimeout, ConnectionError, Exception) as e:
+            TIMEOUT_FLAG = True
+        # The below portion is the critical section and hence lock is acquired
+        # In this critical section, multiple threads try to access num_checks and health dictionary
+        # But only one thread enters the critical section - Mutual exclusion
+        self.lock.acquire()
+        self.num_checks[domain]+=1
+        if not TIMEOUT_FLAG and response and latency and response.status_code>=200 and response.status_code<=299 and latency<500:
+            self.health[domain]+=1
+        self.lock.release()
+            
 
 
 class Endpoint:
