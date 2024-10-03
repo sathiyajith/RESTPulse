@@ -10,10 +10,10 @@ An automated HTTP REST API Health checker tool designed as part of Fetch SRE cha
 
 ## Unit Test
 - Since we cannot emulate a server that provides various responses and under different conditions, I performed unit testing using Python's PyTest package with 4 different tests. 
-- The first test checks for proper initialization.
-- The second test is kind of like load test where I send 500 requests and check for synchronization.
-- The third test ensures handling of different status codes.
-- The fourth test ensures handling of timeouts.
+- The initialization test module ensures that the domains are properly parsed from the endpoints and an entry for each domain is created in dictionary. 
+- The synchronization test module is similar to load test where I send 500 requests and check for synchronization.
+- I came across a mock server that returns different error codes and timeouts based on the parameters passed in the request. This server helps in emulating different scenarios. The error codes test module ensures handling of different status codes.
+- The timeouts module ensures handling of timeouts.
 
 ## Future works
 - The number of HTTP requests can be reduced by delaying the next check for healthier APIs.
