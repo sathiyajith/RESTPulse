@@ -1,0 +1,8 @@
+- name: google
+  url: https://www.google.com
+- name: youtube
+  url: https://www.youtube.com
+- name: jsonplaceholder
+  url: https://jsonplaceholder.typicode.com
+- name: jsonplaceholder posts
+  url: https://jsonplaceholder.typicode.com/posts

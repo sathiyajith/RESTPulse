@@ -1,6 +1,7 @@
 import yaml
 from domains import Endpoint, Domains
 
+# The parser uses the PyYAML library to effectively parse the YAML elements and create endpoint objects.
 def parseYaml(filepath):
     with open(filepath, "r") as file:
         data = yaml.safe_load(file)
