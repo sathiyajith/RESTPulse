@@ -1,10 +1,10 @@
 # RESTPulse
 
 ## About
-An automated HTTP REST API Health checker tool designed as part of the Fetch SRE challenge. This tool built in python, helps in assessing the health of server's HTTP REST API endpoints and keeps a realtime record of its availability. 
+An automated HTTP REST API Health checker tool designed as part of the Fetch SRE challenge. This tool, built in python, helps in assessing the health of server's HTTP REST API endpoints and keeps a realtime record of its availability. 
 
 ## Features
-- This tool supports multithreading, by checking the health of API endpoints every 15 seconds parallelly, even if the yaml file is very big.
+- This tool supports multithreading, by checking the health of API endpoints every 15 seconds parallelly.
 - This tool is unit tested using PyTest module with upto 500 threads running parallelly. 
 - This tool has timeout enabled with 500 milliseconds as threshold to handle indefinite wait cases.
 
@@ -22,7 +22,7 @@ An automated HTTP REST API Health checker tool designed as part of the Fetch SRE
 
 ## Future works
 - The number of HTTP requests can be reduced by delaying the next check for healthier APIs.
-- The current implementation creates a new set of threads every 15 seconds and destroys them after collecting the availability of all endpoints. Instead, we could reuse the same set of threads to invoke the target function every 15 seconds. However, this approach is only efficient for very large YAML files and not for smaller ones, as the threads consume resources by sleeping for the entire 15 seconds.
+- The current implementation creates a new set of threads every 15 seconds and destroys them after collecting the availability of all endpoints. Instead, we could reuse the same set of threads to invoke the target function every 15 seconds. However, this approach is only efficient for very large YAML files and not for smaller ones, as all the threads consume resources by waiting for the entire 15 seconds.
 
 ## Setup 
 Install Python and Pip
