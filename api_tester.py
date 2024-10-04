@@ -22,4 +22,3 @@ if __name__ == "__main__":
             print("Please enter a valid YAML file's absolute path")
     else:
         print("Please enter a valid YAML file's absolute path")
-    
